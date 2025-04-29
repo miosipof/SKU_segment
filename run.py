@@ -6,6 +6,7 @@ import yaml
 from sku_segment.preprocessing.maskgeneration import MaskGenerator
 from sku_segment.training.train import TrainYOLO
 
+
 mask_generator = MaskGenerator(dataset_name='SKU110K_fixed', device='cpu')
 
 
@@ -25,12 +26,11 @@ Step 2: Model initialization
 mask_generator.set_sam2(sam2_checkpoint_name='sam2.1_hiera_large.pt', sam2_config_name='sam2.1_hiera_l.yaml')
 mask_generator.set_dino(grounding_config_name='GroundingDINO_SwinT_OGC.py', grounding_checkpoint_name='groundingdino_swint_ogc.pth')
 
-
 """
 Step 3: [Batched, loop over dataset] Prompt Grounding DINO and SAM image predictor to get the box and mask
 """
 
-# mask_generator.preprocess_dataset(ds, split="train", slice_len=11, batch_size=10) #len(ds[split])
+mask_generator.preprocess_dataset(ds, split="train", slice_len=11, batch_size=10) #len(ds[split])
  
 
 """

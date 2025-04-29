@@ -106,11 +106,12 @@ class MaskGenerator:
         grounding_model_config = os.path.join(grounding_config_dir,grounding_config_name)
         grounding_model_weights = os.path.join(checkpoint_dir,grounding_checkpoint_name)
 
-        grounding_model = load_model(grounding_model_config, grounding_model_weights)
+        self.grounding_model = load_model(grounding_model_config, grounding_model_weights, device=self.device)
         print(f"Grounding model loaded from config {grounding_model_config}, checkpoint {grounding_model_weights}")
-        grounding_model = grounding_model.float()
+        self.grounding_model = self.grounding_model.float()
         print(f"Grounding model converted to float32")
-        grounding_model = grounding_model.to(self.device)
+        self.grounding_model = self.grounding_model.to(self.device)
+        self.grounding_model.eval()
         print(f"Grounding model sent to {self.device}")
 
 
@@ -135,32 +136,74 @@ class MaskGenerator:
             image_np = np.array(image_pil)
             self.image_predictor.set_image(image_pil)
 
+            # prompt = "object"
+            # prompt = "objects, items"
+            prompt = "all small objects, items, things, products, packages, stuff"
+            # prompt = "all objects"
+
+
+            image_tensor = torch.tensor(image_np).permute(2, 0, 1).float() / 255.0
+
+            bboxes, confidences, labels = predict(
+                model=self.grounding_model,
+                image=image_tensor,
+                caption=prompt,
+                device=self.device,
+                box_threshold=0.02,
+                text_threshold=0.02
+            )
+            print(f"{len(bboxes)} bboxes created with Dino")
+
+            h, w = image_pil.size 
+            new_boxes = []
+            for box in bboxes:
+
+                box = box.cpu().numpy()
+
+                x_center, y_center, width, height = box
+
+                # Unnormalize
+                x_center *= w
+                y_center *= h
+                width *= w
+                height *= h
+
+                # Convert to x1, y1, x2, y2
+                x1 = int(x_center - width / 2)
+                y1 = int(y_center - height / 2)
+                x2 = int(x_center + width / 2)
+                y2 = int(y_center + height / 2)
+
+                new_boxes.append([x1,y1,x2,y2])
+
             vis_image = image_np.copy()  # Visualization base
 
-            # # split big bboxes recursively:
-            # split_bboxes = split_big_boxes(sample['bboxes'],
+            ## split big bboxes recursively:
+            # split_bboxes = split_big_boxes(new_boxes,
             #                          image_shape=image_pil.size,
             #                          min_area=500, 
             #                          max_depth=1, 
             #                          iou_threshold=0.6, 
             #                          current_depth=0)
             
-            # print(f"Created {len(split_bboxes)} bboxes out of {len(sample['bboxes'])}")  
+            # print(f"Created {len(split_bboxes)} bboxes out of {len(new_boxes)}")  
             
-            # Filter only "good" bboxes.....
-            bboxes = self.filter_bboxes(
-                sample['bboxes'],
-                image_size=image_np.shape[1::-1],  # (W, H)
-                max_area_ratio=0.4,
-                min_aspect_ratio=0.1,
-                max_aspect_ratio=10.0,
-                max_iou_with_others=0.8,
-                top_k=150
-            )
+            ## OR filter only "good" bboxes.....
+            # bboxes = self.filter_bboxes(
+            #     new_boxes,
+            #     image_size=image_np.shape[1::-1],  # (W, H)
+            #     max_area_ratio=0.4,
+            #     min_aspect_ratio=0.1,
+            #     max_aspect_ratio=10.0,
+            #     max_iou_with_others=0.8,
+            #     top_k=150
+            # )
 
-            print(f"\nSelected {len(bboxes)} bboxes out of {len(sample['bboxes'])}")  
+            ## OR just keep all of them:
+            bboxes = new_boxes
 
-            
+            print(f"\nSelected {len(bboxes)} bboxes out of {len(new_boxes)}")  
+
             skipped = 0
             for i, gt_box in enumerate(bboxes):
                 # Sort box coordinates
@@ -211,7 +254,7 @@ class MaskGenerator:
             sample["mask_paths"] = mask_paths if len(mask_paths) > GOOD_MASK_RATIO * len(bboxes) else None
             sample["mask_scores"] = mask_scores if len(mask_paths) > GOOD_MASK_RATIO * len(bboxes) else None
 
-            del image_pil, image_np
+            del image_pil, image_np, image_tensor
             gc.collect()
             torch.cuda.empty_cache()
 
