@@ -1,8 +1,11 @@
 # Core dependencies
-torch>=2.0.1+cu118
-torchvision>=0.15.2+cu118
-torchaudio>=2.0.2+cu118
---extra-index-url https://download.pytorch.org/whl/cu118
+torch==2.6.0
+torchvision==0.21.0
+torchaudio==2.6.0
+# torch==2.0.1+cu118
+# torchvision>=0.15.2+cu118
+# torchaudio>=2.0.2+cu118
+# --extra-index-url https://download.pytorch.org/whl/cu118
 
 # Transformers + HuggingFace tools
 transformers==4.33.2
@@ -15,16 +18,16 @@ opencv-python==4.7.0.72
 matplotlib==3.7.2
 tqdm==4.66.1
 pycocotools==2.0.7
-scipy==1.10.1
-pandas==2.1.0
+scipy==1.14.1
+pandas
 
 # CUDA extensions
-ninja==1.11.1
-setuptools==67.7.2
-wheel==0.40.0
+# ninja==1.11.1
+# setuptools==67.7.2
+# wheel==0.40.0
 
 # Image processing and visualization
-Pillow==9.5.0
+Pillow==11.2.1
 imageio==2.31.1
 imgaug==0.4.0
 

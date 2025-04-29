@@ -14,6 +14,8 @@ venv/
 .ipynb_checkpoints/
 
 # Datasets and Models
+output/
+output*/
 datasets/
 checkpoints/
 sku_segment/*.pth

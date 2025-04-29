@@ -41,7 +41,7 @@ import gc
 from shapely.geometry import Polygon
 from torchvision.ops import box_iou
 
-import hydra
+# import hydra
 
 # from model.grounded_sam2 import model_def
 
@@ -107,16 +107,18 @@ dino_transform = T.Compose([
 Step 1: Environment settings and model initialization
 """
 
-# Check CUDA 
-print(f"Using torch {torch.__version__} ({torch.cuda.get_device_properties(0).name if torch.cuda.is_available() else 'CPU'})\n")
 
-# use bfloat16 for the entire notebook
-torch.autocast(device_type="cuda", dtype=torch.bfloat16).__enter__()
+if 'cuda' in device:
+    # Check CUDA 
+    print(f"Using torch {torch.__version__} ({torch.cuda.get_device_properties(0).name if torch.cuda.is_available() else 'CPU'})\n")
 
-if torch.cuda.get_device_properties(0).major >= 8:
-    # turn on tfloat32 for Ampere GPUs (https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices)
-    torch.backends.cuda.matmul.allow_tf32 = True
-    torch.backends.cudnn.allow_tf32 = True
+    # use bfloat16 for the entire notebook
+    torch.autocast(device_type=device, dtype=torch.bfloat16).__enter__()
+
+    if torch.cuda.get_device_properties(0).major >= 8:
+        # turn on tfloat32 for Ampere GPUs (https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices)
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
 
 # init sam image predictor and video predictor model
 
@@ -131,13 +133,13 @@ sam2_checkpoint = os.path.join(checkpoint_dir,sam2_checkpoint_name)
 sam2_model_cfg = os.path.join(sam2_config_dir,sam2_config_name)
 
 
-video_predictor = build_sam2_video_predictor(sam2_config_name, sam2_checkpoint)
+video_predictor = build_sam2_video_predictor(sam2_config_name, sam2_checkpoint, device=device)
 print(f"Video predictor loaded from config {sam2_model_cfg}, checkpoint {sam2_checkpoint}")
 
-sam2_image_model = build_sam2(sam2_config_name, sam2_checkpoint)
+sam2_image_model = build_sam2(sam2_config_name, sam2_checkpoint, device=device)
 print(f"SAM2 image model loaded from {sam2_checkpoint}")
 
-image_predictor = SAM2ImagePredictor(sam2_image_model)
+image_predictor = SAM2ImagePredictor(sam2_image_model, device=device)
 print(f"image_predictor loaded from SAM2 image model")
 
 
