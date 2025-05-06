@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment
+.env
+.venv
+env/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Datasets and Models
+output/*
+output*/*
+*output*
+datasets/*
+checkpoints/*
+sku_segment/*.pth
+sku_segment/*.pt
+sku_segment/*.ckpt
+runs/*
+
+# Others
+*.log
+*.DS_Store
