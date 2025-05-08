@@ -6,14 +6,14 @@ import yaml
 import torch
 from sku_segment.preprocessing.maskgeneration import MaskGenerator
 from sku_segment.training.train import TrainYOLO
-import groundingdino
-from groundingdino import _C
+# from sku_segment.grounding_dino import groundingdino
+# from groundingdino import _C
 
 os.environ['CUDA_HOME'] = '/usr/local/cuda-12.1'
 
 device = ("cuda" if torch.cuda.is_available() else "cpu")
 
-mask_generator = MaskGenerator(dataset_name='SKU110K_fixed', device='cuda')
+mask_generator = MaskGenerator(dataset_name='SKU110K_fixed', device=device)
 if 'cuda' in device:
     mask_generator.set_cuda()
     
@@ -39,7 +39,7 @@ mask_generator.set_sam2(sam2_checkpoint_name='sam2.1_hiera_large.pt', sam2_confi
 Step 3: [Batched, loop over dataset] Prompt Grounding DINO and SAM image predictor to get the box and mask
 """
 
-mask_generator.preprocess_dataset(ds, split="train", slice_len=None, batch_size=10)
+# mask_generator.preprocess_dataset(ds, split="train", slice_len=None, batch_size=10)
  
 
 """
@@ -79,8 +79,8 @@ preprocessed_ds = preprocessed_ds[:ds_len]
 print(f"{len(preprocessed_ds)} samples selected")
 
 yolo_ds_path = os.path.join('datasets','yolo_dataset_v3')
-yaml_path = processor.prepare_dataset(preprocessed_ds,train_len,output_dir=yolo_ds_path)
-# yaml_path = os.path.join(yolo_ds_path,'data.yml')
+# yaml_path = processor.prepare_dataset(preprocessed_ds,train_len,output_dir=yolo_ds_path)
+yaml_path = os.path.join(yolo_ds_path,'data.yml')
 
 # Optonal: get full dataset stats
 # import pandas as pd
@@ -109,7 +109,7 @@ with torch.cuda.amp.autocast():
         imgsz=768,
         batch=4,
         single_cls=True,
-        device=0, #'cpu',
+        device='cpu',
         workers=1,
         plots=False,
         verbose=True,

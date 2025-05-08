@@ -30,8 +30,8 @@ from shapely.geometry import box as shapely_box
 from shapely.geometry import Polygon
 
 # from grounding_dino.groundingdino.util.inference import load_model, predict, load_image
-from groundingdino.util.inference import load_model, predict, load_image
-from groundingdino import _C
+from sku_segment.grounding_dino.groundingdino.util.inference import load_model, predict, load_image
+# from sku_segment.grounding_dino.groundingdino import _C
 
 from sam2.utils.track_utils import sample_points_from_masks
 from sam2.utils.video_utils import create_video_from_images
