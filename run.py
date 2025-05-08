@@ -91,7 +91,6 @@ yaml_path = os.path.join(yolo_ds_path,'data.yml')
 # print(df.head())
 
 
-
 """
 Step 5: Train YOLO with segmentation task
 """
