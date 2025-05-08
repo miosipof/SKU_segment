@@ -90,7 +90,6 @@ yaml_path = os.path.join(yolo_ds_path,'data.yml')
 # df.to_csv(f"yolo_dataset_mask_stats_{subset}.csv", index=False)
 # print(df.head())
 
-
 """
 Step 5: Train YOLO with segmentation task
 """
